@@ -1,21 +1,31 @@
 const User = require('../models/User')
 const {StatusCodes} = require('http-status-codes')
-const {BadRequestError} = require('../errors')
-const bcrypt = require('bcryptjs')
+const {BadRequestError, UnauthenticatedError} = require('../errors')
+
+const jwt = require('jsonwebtoken')
 
 const register = async(req, res) => {
-    const {name, email, password} = req.body
-    const tempUser = {name, email, password}
-    const salt = await bcrypt.genSalt(10)
-    if (!name || !email || !password) {
-        throw new BadRequestError('Information missing!!!')
-    }
     const user = await User.create({...req.body})
-    res.status(StatusCodes.CREATED).json({user})
+    const token = user.createJWT()
+    res.status(StatusCodes.CREATED).json({user: {name: user.name}, token})
 }
 
 const login = async(req, res) => {
-    res.send('login')
+    const {email, password} = req.body
+    if (!email || !password) {
+        throw new BadRequestError('Pleaase provide information')
+    }
+    const user = await User.findOne({email})
+    if (!user) {
+        throw new UnauthenticatedError('Invalid Credentials')
+    }
+    const passwordMatch = await user.comparePassword(password)
+    if (!passwordMatch) {
+        throw new UnauthenticatedError('Invalid Credentials')
+    } 
+    const token = user.createJWT()
+    
+    res.status(StatusCodes.OK).json({user: {name: user.name}, token})
 }
 
 

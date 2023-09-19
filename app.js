@@ -1,7 +1,13 @@
 require('dotenv').config();
-require('express-async-errors');
+require('express-async-errors')
 const express = require('express');
 const app = express();
+
+//extra security
+const helmet = require('helmet')
+const cors = require('cors')
+const xss = require('xss-clean')
+const rateLimiter = require('express-rate-limit')
 
 //connectDB
 const connectDB = require('./db/connect')
@@ -14,7 +20,14 @@ const jobRouter = require('./routes/jobs')
 const notFoundMiddleware = require('./middleware/not-found');
 const errorHandlerMiddleware = require('./middleware/error-handler');
 
+
+
 app.use(express.json());
+app.use(helmet)
+app.use(cors)
+app.use(xss)
+app.use(rateLimiter)
+
 // extra packages
 
 // routes

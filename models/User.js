@@ -11,7 +11,6 @@ const UserSchema = new mongoose.Schema({
             value: true,
             message: 'The username existed',
           },
-
     },
     email: {
         type: String,
@@ -39,6 +38,7 @@ UserSchema.methods.createJWT = function() {
         expiresIn: process.env.JWT_LIFETIME
     })
 }
+
 UserSchema.methods.comparePassword = async function(pw) {
     const isMatch = await bcrypt.compare(pw, this.password)
     return isMatch
